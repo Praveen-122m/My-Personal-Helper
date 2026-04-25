@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
 import { useTheme } from '../context/ThemeContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LoginPage = ({ setUserInfo }) => {
   const [email, setEmail] = useState('');
@@ -42,44 +43,84 @@ const LoginPage = ({ setUserInfo }) => {
   };
 
   return (
-    <Container className="d-flex justify-content-center align-items-center py-5">
-      <Card className={`shadow-lg p-4 ${theme === 'dark' ? 'bg-secondary text-light' : 'bg-white'}`} style={{ maxWidth: '450px', width: '100%' }}>
-        <Card.Body>
-          <h2 className="text-center mb-4">Login to Your Account</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
+    <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center py-5" 
+      style={{
+        background: theme === 'dark' 
+          ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+          : 'linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%)'
+      }}>
+      <Card className={`shadow-lg border-0 ${
+        theme === 'dark' ? 'bg-dark text-light' : 'bg-white'
+      }`} style={{ maxWidth: '450px', width: '100%', borderRadius: '1rem' }}>
+        <Card.Body className="p-5">
+          <div className="text-center mb-4">
+            <i className={`bi bi-person-circle display-1 ${
+              theme === 'dark' ? 'text-warning' : 'text-primary'
+            }`}></i>
+          </div>
+          <h2 className={`text-center mb-4 fw-bold ${
+            theme === 'dark' ? 'text-light' : 'text-dark'
+          }`}>Welcome Back!</h2>
+          {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+          {success && <Alert variant="success" className="mb-4">{success}</Alert>}
           <Form onSubmit={submitHandler}>
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email Address</Form.Label>
+            <Form.Group className="mb-4" controlId="email">
+              <Form.Label className={theme === 'dark' ? 'text-light' : ''}>
+                <i className="bi bi-envelope-fill me-2"></i>Email Address
+              </Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                className={`form-control-lg ${
+                  theme === 'dark' ? 'bg-dark text-light border-secondary' : ''
+                }`}
               />
             </Form.Group>
 
             <Form.Group className="mb-4" controlId="password">
-              <Form.Label>Password</Form.Label>
+              <Form.Label className={theme === 'dark' ? 'text-light' : ''}>
+                <i className="bi bi-lock-fill me-2"></i>Password
+              </Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                className={`form-control-lg ${
+                  theme === 'dark' ? 'bg-dark text-light border-secondary' : ''
+                }`}
               />
             </Form.Group>
 
-            <Button variant={theme === 'dark' ? 'warning' : 'primary'} type="submit" className="w-100 mb-3">
-              Login
-            </Button>
+            <div className="d-grid gap-2 mt-4">
+              <Button
+                variant={theme === 'dark' ? 'warning' : 'primary'}
+                type="submit"
+                size="lg"
+                className="fw-bold"
+              >
+                <i className="bi bi-box-arrow-in-right me-2"></i>
+                Login
+              </Button>
+            </div>
           </Form>
-          <p className={`text-center mt-3 ${theme === 'dark' ? 'text-light-50' : 'text-muted'}`}>
-            Don't have an account? <Link to="/register" className={theme === 'dark' ? 'text-warning' : 'text-primary'}>Register Here</Link>
-          </p>
+          <div className="text-center mt-4">
+            <p className={theme === 'dark' ? 'text-light-50' : 'text-muted'}>
+              Don't have an account?{' '}
+              <Link
+                to="/register"
+                className={`fw-bold text-decoration-none ${
+                  theme === 'dark' ? 'text-warning' : 'text-primary'
+                }`}
+              >
+                Register Here
+              </Link>
+            </p>
+          </div>
         </Card.Body>
       </Card>
     </Container>

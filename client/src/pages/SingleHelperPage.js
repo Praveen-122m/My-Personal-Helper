@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Card, Button, Alert, Row, Col, Modal, Form } from 'react-bootstrap';
 import { useTheme } from '../context/ThemeContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const SingleHelperPage = () => {
   const { id } = useParams();

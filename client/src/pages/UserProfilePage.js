@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Container, Form, Button, Card, Alert, Row, Col } from 'react-bootstrap'; // Added Row, Col
+import { Container, Form, Button, Card, Alert, Row, Col } from 'react-bootstrap';
 import { useTheme } from '../context/ThemeContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const UserProfilePage = () => {
   const { theme } = useTheme();

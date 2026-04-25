@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useTheme } from '../context/ThemeContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const HelperListPage = () => {
   const { theme } = useTheme();

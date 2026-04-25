@@ -1,0 +1,258 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
+import { Container, Form, Button, Card, Alert, Row, Col } from 'react-bootstrap';
+import { useTheme } from '../context/ThemeContext';
+
+const RegisterPage = ({ setUserInfo }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('user');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  const [services, setServices] = useState('');
+  const [experience, setExperience] = useState('');
+  const [bio, setBio] = useState('');
+  const [hourlyRate, setHourlyRate] = useState('');
+  const [areaOfOperation, setAreaOfOperation] = useState('');
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
+  const [idProofFile, setIdProofFile] = useState(null); 
+  const [idProofPreviewUrl, setIdProofPreviewUrl] = useState(null); 
+
+  useEffect(() => {
+    return () => {
+      if (idProofPreviewUrl) {
+        URL.revokeObjectURL(idProofPreviewUrl);
+      }
+    };
+  }, [idProofPreviewUrl]);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    const registerData = {
+      name, email, password, role, phone, address,
+      city, state,
+    };
+
+    if (role === 'helper') {
+      registerData.services = services.split(',').map(s => s.trim()).filter(s => s !== '');
+      registerData.experience = experience;
+      registerData.bio = bio;
+      registerData.hourlyRate = hourlyRate;
+      registerData.areaOfOperation = areaOfOperation.split(',').map(a => a.trim()).filter(a => a !== '');
+      
+      registerData.aadhaarNumber = aadhaarNumber;
+      registerData.idProofUrl = idProofFile ? 'demo_aadhaar_url' : ''; 
+      registerData.profilePicture = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    }
+
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      const { data } = await axios.post(
+        'http://localhost:5000/api/auth/register',
+        registerData,
+        config
+      );
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUserInfo(data);
+      setSuccess('Registration successful! You are now logged in. Redirecting...');
+      setIdProofPreviewUrl(null);
+
+      navigate('/');
+
+    } catch (err) {
+      setError(err.response && err.response.data.message ? err.response.data.message : 'Registration failed. Please try again.');
+    }
+  };
+
+  const handleFileChange = (e, setFileState, setPreviewUrlState = null) => {
+    const file = e.target.files[0];
+    setFileState(file);
+
+    if (setPreviewUrlState) {
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setPreviewUrlState(url);
+      } else {
+        setPreviewUrlState(null);
+      }
+    }
+  };
+
+  return (
+    <Container fluid className={`min-vh-100 d-flex justify-content-center align-items-center py-5 ${
+      theme === 'dark' ? 'bg-dark' : 'bg-light'
+    }`}>
+      <Container className="px-4">
+        <Card className={`shadow-lg mx-auto ${
+          theme === 'dark' ? 'bg-dark text-light' : 'bg-white'
+        }`} style={{ maxWidth: '800px' }}>
+          <Card.Body className="p-4 p-md-5">
+            <div className="text-center mb-4">
+              <i className={`bi bi-person-plus-circle display-1 ${
+                theme === 'dark' ? 'text-warning' : 'text-primary'
+              }`}></i>
+              <h2 className={`h3 mt-3 mb-4 fw-bold ${
+                theme === 'dark' ? 'text-light' : 'text-dark'
+              }`}>Create Your Account</h2>
+            </div>
+            
+            {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+            {success && <Alert variant="success" className="mb-4">{success}</Alert>}
+            
+            <Form onSubmit={submitHandler}>
+              <Row className="g-4">
+                <Col md={6}>
+                  <Form.Group controlId="name">
+                    <Form.Label>Full Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="email">
+                    <Form.Label>Email Address</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+              <input type="tel" placeholder="Enter your phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address (Optional)</label>
+              <input type="text" placeholder="e.g., House No., Street, Locality" value={address} onChange={(e) => setAddress(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
+              <input type="text" placeholder="e.g., Pali" value={city} onChange={(e) => setCity(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">State</label>
+              <input type="text" placeholder="e.g., Rajasthan" value={state} onChange={(e) => setState(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Registering as:</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200">
+              <option value="user">Customer</option>
+              <option value="helper">Service Provider (Helper)</option>
+            </select>
+          </div>
+
+          {role === 'helper' && (
+            <div className="p-4 mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-inner">
+              <h4 className="text-center text-xl font-bold mb-3 text-blue-600 dark:text-yellow-400">Service Provider Details</h4>
+              <div className="text-center mb-4">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-600 dark:border-yellow-400" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Services Offered (Comma-separated)</label>
+                <input type="text" placeholder="e.g., Electrician, Plumber" value={services} onChange={(e) => setServices(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Years of Experience</label>
+                  <input type="number" placeholder="e.g., 5" value={experience} onChange={(e) => setExperience(e.target.value)} min="0" className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Hourly Rate (₹)</label>
+                  <input type="number" placeholder="e.g., 300" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio (Tell us about yourself)</label>
+                <textarea rows={3} placeholder="e.g., Certified electrician with 10 years experience." value={bio} onChange={(e) => setBio(e.target.value)} maxLength="500" className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Areas of Operation (Comma-separated localities in Pali)</label>
+                <input type="text" placeholder="e.g., Housing Board, Mandiya Road" value={areaOfOperation} onChange={(e) => setAreaOfOperation(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+              </div>
+
+              <h5 className="mt-4 mb-3 text-lg font-semibold text-gray-900 dark:text-white">Identity Verification</h5>
+              <Alert variant="info" className="mb-3">
+                <i className="bi bi-info-circle-fill me-2"></i> This photo is for demo only. The actual file is not uploaded.
+              </Alert>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Aadhaar Number (12 Digits)</label>
+                <input type="text" placeholder="Enter 12-digit Aadhaar number" value={aadhaarNumber} onChange={(e) => setAadhaarNumber(e.target.value)} required={role === 'helper'} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" maxLength="12" minLength="12" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Aadhaar Card Photo</label>
+                <input type="file" onChange={(e) => handleFileChange(e, setIdProofFile, setIdProofPreviewUrl)} required={role === 'helper'} className="mt-1 block w-full text-gray-900 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" />
+                {idProofFile && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Selected: {idProofFile.name}</p>}
+                {idProofPreviewUrl && (
+                  <div className="mt-2">
+                    <img src={idProofPreviewUrl} alt="ID Proof Preview" className="rounded-lg max-w-xs border-2 border-blue-500 dark:border-yellow-400" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
+              <input type="password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-200" />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 ease-in-out mb-4 dark:bg-yellow-500 dark:hover:bg-yellow-600">
+            Register
+          </Button>
+        </form>
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+          Already have an account? <a href="/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-yellow-400 dark:hover:text-yellow-300">Login Here</a>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;

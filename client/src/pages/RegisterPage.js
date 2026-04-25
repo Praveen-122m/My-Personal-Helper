@@ -36,6 +36,16 @@ const RegisterPage = ({ setUserInfo }) => {
     };
   }, [idProofPreviewUrl]);
 
+  const handleFileChange = (e, setFileState, setPreviewUrlState = null) => {
+    const file = e.target.files[0];
+    setFileState(file);
+
+    if (setPreviewUrlState && file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrlState(url);
+    }
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setError('');
@@ -57,7 +67,6 @@ const RegisterPage = ({ setUserInfo }) => {
       registerData.bio = bio;
       registerData.hourlyRate = hourlyRate;
       registerData.areaOfOperation = areaOfOperation.split(',').map(a => a.trim()).filter(a => a !== '');
-
       registerData.aadhaarNumber = aadhaarNumber;
       registerData.idProofUrl = idProofFile ? 'demo_aadhaar_url' : ''; 
       registerData.profilePicture = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
@@ -79,166 +88,306 @@ const RegisterPage = ({ setUserInfo }) => {
       localStorage.setItem('userInfo', JSON.stringify(data));
       setUserInfo(data);
       setSuccess('Registration successful! You are now logged in. Redirecting...');
-      setIdProofPreviewUrl(null);
-
       navigate('/');
 
     } catch (err) {
-      setError(err.response && err.response.data.message ? err.response.data.message : 'Registration failed. Please try again.');
+      setError(err.response && err.response.data.message 
+        ? err.response.data.message 
+        : 'Registration failed. Please try again.'
+      );
     }
   };
-
-  const handleFileChange = (e, setFileState, setPreviewUrlState = null) => {
-    const file = e.target.files[0];
-    setFileState(file);
-
-    if (setPreviewUrlState) {
-      if (file) {
-        const url = URL.createObjectURL(file);
-        setPreviewUrlState(url);
-      } else {
-        setPreviewUrlState(null);
-      }
-    }
-  };
-
-  const inputClass = theme === 'dark' ? 'bg-dark text-light border-secondary' : '';
-  const labelClass = theme === 'dark' ? 'text-light' : 'text-dark';
 
   return (
-    <Container className="d-flex justify-content-center align-items-center py-5">
-      <Card className={`shadow-lg p-4 ${theme === 'dark' ? 'bg-secondary text-light' : 'bg-white'}`} style={{ maxWidth: '600px', width: '100%' }}>
-        <Card.Body>
-          <h2 className="text-center mb-4">Create Your Account</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
-          <Form onSubmit={submitHandler}>
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="name">
-                <Form.Label className={labelClass}>Full Name</Form.Label>
-                <Form.Control type="text" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
-              </Form.Group>
-              <Form.Group as={Col} controlId="email">
-                <Form.Label className={labelClass}>Email Address</Form.Label>
-                <Form.Control type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-              </Form.Group>
-            </Row>
-
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="phone">
-                <Form.Label className={labelClass}>Phone Number</Form.Label>
-                <Form.Control type="tel" placeholder="Enter your phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
-              </Form.Group>
-              <Form.Group as={Col} controlId="address">
-                <Form.Label className={labelClass}>Address (Optional)</Form.Label>
-                <Form.Control type="text" placeholder="e.g., House No., Street, Locality" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
-              </Form.Group>
-            </Row>
-
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="city">
-                <Form.Label className={labelClass}>City</Form.Label>
-                <Form.Control type="text" placeholder="e.g., Pali" value={city} onChange={(e) => setCity(e.target.value)} required className={inputClass} />
-              </Form.Group>
-              <Form.Group as={Col} controlId="state">
-                <Form.Label className={labelClass}>State</Form.Label>
-                <Form.Control type="text" placeholder="e.g., Rajasthan" value={state} onChange={(e) => setState(e.target.value)} required className={inputClass} />
-              </Form.Group>
-            </Row>
-
-            <Form.Group className="mb-3" controlId="role">
-              <Form.Label className={labelClass}>Registering as:</Form.Label>
-              <Form.Select value={role} onChange={(e) => setRole(e.target.value)} className={inputClass}>
-                <option value="user">Customer</option>
-                <option value="helper">Service Provider (Helper)</option>
-              </Form.Select>
-            </Form.Group>
-
-            {role === 'helper' && (
-              <Card className={`p-4 mb-4 ${theme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-                <h4 className="mb-3 text-center text-primary">Service Provider Details</h4>
-                <div className="text-center mb-4">
-                  <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" className="img-fluid rounded-circle" style={{width: '150px', height: '150px', objectFit: 'cover', border: `4px solid ${theme === 'dark' ? '#ffc107' : '#0d6efd'}`}} />
-                </div>
-                <Form.Group className="mb-3" controlId="services">
-                  <Form.Label className={labelClass}>Services Offered (Comma-separated)</Form.Label>
-                  <Form.Control type="text" placeholder="e.g., Electrician, Plumber" value={services} onChange={(e) => setServices(e.target.value)} className={inputClass} />
-                </Form.Group>
-                <Row className="mb-3">
-                  <Form.Group as={Col} controlId="experience">
-                    <Form.Label className={labelClass}>Years of Experience</Form.Label>
-                    <Form.Control type="number" placeholder="e.g., 5" value={experience} onChange={(e) => setExperience(e.target.value)} min="0" className={inputClass} />
-                  </Form.Group>
-                  <Form.Group as={Col} controlId="hourlyRate">
-                    <Form.Label className={labelClass}>Hourly Rate (₹)</Form.Label>
-                    <Form.Control type="number" placeholder="e.g., 300" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" className={inputClass} />
-                  </Form.Group>
-                </Row>
-                <Form.Group className="mb-3" controlId="bio">
-                  <Form.Label className={labelClass}>Bio (Tell us about yourself)</Form.Label>
-                  <Form.Control as="textarea" rows={3} placeholder="e.g., Certified electrician with 10 years experience." value={bio} onChange={(e) => setBio(e.target.value)} maxLength="500" className={inputClass} />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="areaOfOperation">
-                  <Form.Label className={labelClass}>Areas of Operation (Comma-separated localities in Pali)</Form.Label>
-                  <Form.Control type="text" placeholder="e.g., Housing Board, Mandiya Road" value={areaOfOperation} onChange={(e) => setAreaOfOperation(e.target.value)} className={inputClass} />
-                </Form.Group>
-
-                <h5 className={`mt-4 mb-3 ${theme === 'dark' ? 'text-light' : 'text-dark'}`}>Identity Verification</h5>
-                <Alert variant="info" className="mb-3">
-                    <i className="bi bi-info-circle-fill me-2"></i> This photo is for demo only. The actual file is not uploaded.
-                </Alert>
-                <Form.Group className="mb-3" controlId="aadhaarNumber">
-                    <Form.Label className={labelClass}>Aadhaar Number (12 Digits)</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        placeholder="Enter 12-digit Aadhaar number" 
-                        value={aadhaarNumber} 
-                        onChange={(e) => setAadhaarNumber(e.target.value)} 
-                        required={role === 'helper'} 
-                        className={inputClass} 
-                        maxLength="12" 
-                        minLength="12"
+    <Container fluid className={`min-vh-100 d-flex justify-content-center align-items-center py-5 ${
+      theme === 'dark' ? 'bg-dark' : 'bg-light'
+    }`}>
+      <Container className="px-4">
+        <Card className={`shadow-lg mx-auto ${
+          theme === 'dark' ? 'bg-dark text-light' : 'bg-white'
+        }`} style={{ maxWidth: '800px' }}>
+          <Card.Body className="p-4 p-md-5">
+            <div className="text-center mb-4">
+              <i className={`bi bi-person-plus-circle display-1 ${
+                theme === 'dark' ? 'text-warning' : 'text-primary'
+              }`}></i>
+              <h2 className={`h3 mt-3 mb-4 fw-bold ${
+                theme === 'dark' ? 'text-light' : 'text-dark'
+              }`}>Create Your Account</h2>
+            </div>
+            
+            {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+            {success && <Alert variant="success" className="mb-4">{success}</Alert>}
+            
+            <Form onSubmit={submitHandler}>
+              <Row className="g-4">
+                <Col md={6}>
+                  <Form.Group controlId="name">
+                    <Form.Label>Full Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
                     />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="idProofFile">
-                    <Form.Label className={labelClass}>Aadhaar Card Photo</Form.Label>
-                    <Form.Control 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, setIdProofFile, setIdProofPreviewUrl)}
-                        required={role === 'helper'} 
-                        className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''} 
-                        accept="image/*"
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="email">
+                    <Form.Label>Email Address</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
                     />
-                     {idProofFile && <Form.Text className={labelClass}>Selected: {idProofFile.name}</Form.Text>}
-                     {idProofPreviewUrl && (
-                        <div className="mt-2">
-                            <img src={idProofPreviewUrl} alt="ID Proof Preview" className="img-fluid rounded" style={{maxWidth: '200px', border: `2px solid ${theme === 'dark' ? '#ffc107' : '#0d6efd'}`}} />
-                        </div>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="g-4 mt-2">
+                <Col md={6}>
+                  <Form.Group controlId="phone">
+                    <Form.Label>Phone Number</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="address">
+                    <Form.Label>Address</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="g-4 mt-2">
+                <Col md={6}>
+                  <Form.Group controlId="city">
+                    <Form.Label>City</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your city"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="state">
+                    <Form.Label>State</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your state"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Form.Group controlId="role" className="mt-4">
+                <Form.Label>Register as</Form.Label>
+                <Form.Select 
+                  value={role} 
+                  onChange={(e) => setRole(e.target.value)}
+                  className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                >
+                  <option value="user">Customer</option>
+                  <option value="helper">Service Provider</option>
+                </Form.Select>
+              </Form.Group>
+
+              {role === 'helper' && (
+                <div className={`mt-4 p-4 rounded-3 ${theme === 'dark' ? 'bg-secondary' : 'bg-light'}`}>
+                  <h4 className={`text-center mb-4 ${theme === 'dark' ? 'text-warning' : 'text-primary'}`}>
+                    Service Provider Details
+                  </h4>
+                  
+                  <Row className="g-4">
+                    <Col md={12}>
+                      <Form.Group controlId="services">
+                        <Form.Label>Services Offered (comma-separated)</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="e.g., Electrician, Plumber"
+                          value={services}
+                          onChange={(e) => setServices(e.target.value)}
+                          required
+                          className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row className="g-4 mt-2">
+                    <Col md={6}>
+                      <Form.Group controlId="experience">
+                        <Form.Label>Years of Experience</Form.Label>
+                        <Form.Control
+                          type="number"
+                          placeholder="Enter years of experience"
+                          value={experience}
+                          onChange={(e) => setExperience(e.target.value)}
+                          required
+                          className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId="hourlyRate">
+                        <Form.Label>Hourly Rate (₹)</Form.Label>
+                        <Form.Control
+                          type="number"
+                          placeholder="Enter your hourly rate"
+                          value={hourlyRate}
+                          onChange={(e) => setHourlyRate(e.target.value)}
+                          required
+                          className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Form.Group controlId="bio" className="mt-4">
+                    <Form.Label>Bio</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Tell us about yourself..."
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="areaOfOperation" className="mt-4">
+                    <Form.Label>Areas of Operation (comma-separated)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="e.g., Housing Board, Mandiya Road"
+                      value={areaOfOperation}
+                      onChange={(e) => setAreaOfOperation(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="aadhaar" className="mt-4">
+                    <Form.Label>Aadhaar Number</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter your 12-digit Aadhaar number"
+                      value={aadhaarNumber}
+                      onChange={(e) => setAadhaarNumber(e.target.value)}
+                      required
+                      maxLength="12"
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="idProof" className="mt-4">
+                    <Form.Label>ID Proof (Aadhaar Card)</Form.Label>
+                    <Form.Control
+                      type="file"
+                      onChange={(e) => handleFileChange(e, setIdProofFile, setIdProofPreviewUrl)}
+                      required
+                      accept="image/*"
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                    {idProofFile && 
+                      <Form.Text className={theme === 'dark' ? 'text-light' : 'text-muted'}>
+                        Selected: {idProofFile.name}
+                      </Form.Text>
+                    }
+                    {idProofPreviewUrl && (
+                      <div className="mt-3">
+                        <img 
+                          src={idProofPreviewUrl} 
+                          alt="ID Preview" 
+                          className="rounded-3" 
+                          style={{ maxWidth: '200px' }} 
+                        />
+                      </div>
                     )}
-                </Form.Group>
-              </Card>
-            )}
+                  </Form.Group>
+                </div>
+              )}
 
-            <Row className="mb-4">
-              <Form.Group as={Col} controlId="password">
-                <Form.Label className={labelClass}>Password</Form.Label>
-                <Form.Control type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required className={inputClass} />
-              </Form.Group>
-              <Form.Group as={Col} controlId="confirmPassword">
-                <Form.Label className={labelClass}>Confirm Password</Form.Label>
-                <Form.Control type="password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className={inputClass} />
-              </Form.Group>
-            </Row>
+              <Row className="g-4 mt-4">
+                <Col md={6}>
+                  <Form.Group controlId="password">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="confirmPassword">
+                    <Form.Label>Confirm Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className={theme === 'dark' ? 'bg-dark text-light border-secondary' : ''}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-            <Button variant={theme === 'dark' ? 'success' : 'primary'} type="submit" className="w-100 mb-3">
-              Register
-            </Button>
-          </Form>
-          <p className={`text-center mt-3 ${theme === 'dark' ? 'text-light-50' : 'text-muted'}`}>
-            Already have an account? <Link to="/login" className={theme === 'dark' ? 'text-warning' : 'text-primary'}>Login Here</Link>
-          </p>
-        </Card.Body>
-      </Card>
+              <div className="d-grid mt-5">
+                <Button 
+                  type="submit" 
+                  variant={theme === 'dark' ? 'warning' : 'primary'}
+                  size="lg"
+                >
+                  Create Account
+                </Button>
+              </div>
+
+              <div className="text-center mt-4">
+                <p className={theme === 'dark' ? 'text-light' : 'text-muted'}>
+                  Already have an account?{' '}
+                  <Link 
+                    to="/login"
+                    className={`text-decoration-none ${theme === 'dark' ? 'text-warning' : 'text-primary'}`}
+                  >
+                    Login here
+                  </Link>
+                </p>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
     </Container>
   );
 };

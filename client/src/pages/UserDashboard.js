@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Container, Card, Button, Alert, Tab, Tabs, Row, Col, Form } from 'react-bootstrap'; // Import Form
+import { Container, Card, Button, Alert, Tab, Tabs, Row, Col, Form } from 'react-bootstrap';
 import { useTheme } from '../context/ThemeContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const UserDashboard = () => {
   const navigate = useNavigate();

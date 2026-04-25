@@ -1,9 +1,8 @@
-import React, { useState } from 'react'; // Import useState for local state if needed
-import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap'; // Import Card
-import { useNavigate, Link } from 'react-router-dom'; // Add Link here// Import useNavigate for search redirection
+import React, { useState } from 'react';
+import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
-
 
 const HomePage = () => {
   const { theme } = useTheme();
